@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, Moon, Copy, ArrowRight, Loader2 } from 'lucide-react';
 
 interface LobbyProps {
@@ -6,18 +6,37 @@ interface LobbyProps {
   onJoinRoom: (id: string) => void;
   isConnecting: boolean;
   generatedId: string | null;
+  inviteUrl?: string;
+  initialJoinId?: string;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ onCreateRoom, onJoinRoom, isConnecting, generatedId }) => {
+const Lobby: React.FC<LobbyProps> = ({ onCreateRoom, onJoinRoom, isConnecting, generatedId, inviteUrl, initialJoinId }) => {
   const [joinId, setJoinId] = useState('');
   const [mode, setMode] = useState<'SELECT' | 'CREATE' | 'JOIN'>('SELECT');
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Pre-fill join code and mode when arriving via invite link
+  useEffect(() => {
+    if (initialJoinId) {
+      setJoinId(initialJoinId);
+      setMode('JOIN');
+    }
+  }, [initialJoinId]);
 
   const handleCopy = () => {
     if (generatedId) {
       navigator.clipboard.writeText(generatedId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (inviteUrl) {
+      navigator.clipboard.writeText(inviteUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
     }
   };
 
@@ -53,6 +72,22 @@ const Lobby: React.FC<LobbyProps> = ({ onCreateRoom, onJoinRoom, isConnecting, g
         <div className="text-xs text-white/40 mb-8">
             Waiting for connection...
         </div>
+
+        {inviteUrl && (
+          <div className="bg-black/40 border border-purple-500/20 rounded-lg p-4 text-left space-y-3">
+            <div className="text-sm text-purple-100/80 font-medium">Shareable Link</div>
+            <div className="bg-black/40 p-3 rounded-lg border border-white/10 text-xs break-all text-purple-50/80 font-mono">
+              {inviteUrl}
+            </div>
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center space-x-2 text-sm text-purple-200 hover:text-white transition-colors"
+            >
+              <Copy className={`w-4 h-4 ${linkCopied ? 'text-green-400' : ''}`} />
+              <span>{linkCopied ? 'Link copied' : 'Copy direct invite link (no button click needed)'}</span>
+            </button>
+          </div>
+        )}
         
         <button onClick={() => setMode('SELECT')} className="text-white/60 hover:text-white text-sm">
           Cancel

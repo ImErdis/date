@@ -105,7 +105,7 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ message, onClose }) => {
            
            {/* BACK / RIGHT SIDE (Base) - Always visible, but covered initially */}
            <div className="card-base bg-[#f8f9fa] border-r-4 border-b-4 border-gray-200">
-               <div className="w-full h-full flex flex-col items-center justify-center p-4">
+               <div className="w-full h-full flex flex-col items-center justify-center p-4 [container-type:size]">
                   {/* Flower Container */}
                   <div className="relative w-full h-[60%] flex items-center justify-center overflow-hidden rounded-lg mb-4">
                      <div className={`transform transition-all duration-1000 ease-out delay-500 w-full h-full ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>

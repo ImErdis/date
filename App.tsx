@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import StarField from './components/StarField';
 import VideoPlayer from './components/VideoPlayer';
 import HandHold from './components/HandHold';
@@ -31,6 +31,10 @@ const App: React.FC = () => {
   
   // Gift State
   const [giftData, setGiftData] = useState<{ message: string } | null>(null);
+  
+  // Deep-link join
+  const [autoJoinId, setAutoJoinId] = useState<string | null>(null);
+  const [autoJoinTriggered, setAutoJoinTriggered] = useState(false);
   
   // Sync Logic
   const [incomingSyncEvent, setIncomingSyncEvent] = useState<SyncEvent | null>(null);
@@ -82,6 +86,15 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Grab ?join=ROOM_ID from URL for no-click invites
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinParam = params.get('join');
+    if (joinParam) {
+      setAutoJoinId(joinParam);
+    }
+  }, []);
+
   const setupConnection = (conn: DataConnection) => {
     connectionRef.current = conn; // Update ref immediately
 
@@ -129,13 +142,22 @@ const App: React.FC = () => {
     setRole('HOST');
   };
 
-  const joinRoom = (hostId: string) => {
+  const joinRoom = useCallback((hostId: string) => {
     if (!peerRef.current) return;
     setIsConnecting(true);
     setRole('GUEST');
     const conn = peerRef.current.connect(hostId);
     setupConnection(conn);
-  };
+  }, []);
+
+  // Auto-join when a join param is present and we are not already in a room
+  useEffect(() => {
+    if (!autoJoinId || autoJoinTriggered || isInRoom || isConnecting) return;
+    if (peerRef.current) {
+      setAutoJoinTriggered(true);
+      joinRoom(autoJoinId);
+    }
+  }, [autoJoinId, autoJoinTriggered, isInRoom, isConnecting, joinRoom]);
 
   const sendSyncEvent = (type: SyncActionType, payload: any) => {
     const conn = connectionRef.current;
@@ -169,6 +191,11 @@ const App: React.FC = () => {
       }
     }
   };
+
+  const inviteUrl = useMemo(() => {
+    if (!peerId || typeof window === 'undefined') return '';
+    return `${window.location.origin}${window.location.pathname}?join=${peerId}`;
+  }, [peerId]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#020617]">
@@ -223,6 +250,8 @@ const App: React.FC = () => {
             onJoinRoom={joinRoom}
             isConnecting={isConnecting}
             generatedId={peerId}
+            inviteUrl={inviteUrl}
+            initialJoinId={autoJoinId || ''}
           />
         ) : (
           <>
