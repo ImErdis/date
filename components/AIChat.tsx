@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Film, MessageCircle } from 'lucide-react';
 import { ChatMessage } from '../types';
-import { generateRomanticResponse, suggestMovies } from '../services/geminiService';
+import { generateRomanticResponse } from '../services/geminiService';
 
 interface AIChatProps {
   isOpen: boolean;
@@ -61,8 +61,6 @@ const AIChat: React.FC<AIChatProps> = ({ isOpen, onClose }) => {
       if (action === 'poem') prompt = "Write a short 4 line poem about love and stars.";
 
       setInput(prompt);
-      // We could auto-send, but let's let the user see it first or just auto send for magic feel
-      // Let's auto send for smoother UX
       if (isLoading) return;
       
       const userMsg: ChatMessage = {
@@ -74,8 +72,6 @@ const AIChat: React.FC<AIChatProps> = ({ isOpen, onClose }) => {
       setMessages(prev => [...prev, userMsg]);
       setIsLoading(true);
       
-      // If movie, use the specialized function sometimes, or just the chat wrapper.
-      // Let's use generic chat wrapper for consistency of persona
       const reply = await generateRomanticResponse(prompt, messages);
       
       setMessages(prev => [...prev, {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Heart, Sparkles } from 'lucide-react';
 import Flower from './Flower';
@@ -108,8 +107,8 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ message, onClose }) => {
            <div className="card-base bg-[#f8f9fa] border-r-4 border-b-4 border-gray-200">
                <div className="w-full h-full flex flex-col items-center justify-center p-4">
                   {/* Flower Container */}
-                  <div className="relative w-full h-[60%] flex items-center justify-center overflow-hidden rounded-lg mb-4 [container-type:size]">
-                     <div className={`transform transition-all duration-1000 ease-out delay-500 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+                  <div className="relative w-full h-[60%] flex items-center justify-center overflow-hidden rounded-lg mb-4">
+                     <div className={`transform transition-all duration-1000 ease-out delay-500 w-full h-full ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
                         <Flower />
                      </div>
                   </div>
